@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, Folder } from "lucide-react"
-import { getProjects as fetchProjects } from "@/lib/github"
+import { getProjects, extractDescriptionFromProject } from "@/lib/github"
 
 interface Project {
 	name: string
@@ -12,7 +12,7 @@ interface Project {
 }
 
 export default async function Home() {
-	const projects = await fetchProjects()
+	const projects = await getProjects()
 
 	return (
 		<main className="min-h-screen bg-background">
@@ -44,7 +44,7 @@ export default async function Home() {
 											<ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
 										</div>
 										<CardTitle className="text-xl">{project.name}</CardTitle>
-										<CardDescription>View project documentation and resources</CardDescription>
+										<CardDescription>{extractDescriptionFromProject(project.name)}</CardDescription>
 									</CardHeader>
 									<CardContent>
 										{project.tags.length > 0 && (

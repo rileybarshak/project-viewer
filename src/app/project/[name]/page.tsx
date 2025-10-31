@@ -1,4 +1,4 @@
-// app/project/[name]/page.tsx
+//app/project/[name]/page.tsx
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, FileText } from "lucide-react"
@@ -12,9 +12,9 @@ import { getProjectFiles, getFileContent, extractTagsFromProject } from "@/lib/g
 
 function resolveAssetUrl(projectName: string, url?: string) {
 	if (!url) return ""
-	// absolute URL: leave as-is
+	//absolute URL: leave as-is
 	if (/^https?:\/\//i.test(url)) return url
-	// map relative to raw GitHub content in your repo
+	//map relative to raw GitHub content in your repo
 	return `https://raw.githubusercontent.com/rileybarshak/projects/HEAD/${encodeURIComponent(
 		projectName
 	)}/${url.replace(/^.\//, "")}`
@@ -23,7 +23,7 @@ function resolveAssetUrl(projectName: string, url?: string) {
 function resolvePageUrl(projectName: string, href?: string) {
 	if (!href) return "#"
 	if (/^https?:\/\//i.test(href)) return href
-	// Link to the GitHub UI (blob view) for relative docs
+	//Link to the GitHub UI (blob view) for relative docs
 	return `https://github.com/rileybarshak/projects/blob/HEAD/${encodeURIComponent(
 		projectName
 	)}/${href.replace(/^.\//, "")}`
@@ -94,7 +94,6 @@ export default async function ProjectPage({
 						remarkPlugins={[remarkGfm]}
 						components={{
 							img({ src, alt, ...props }) {
-								// TypeScript fix: src may be string | Blob | undefined
 								const resolvedSrc =
 									typeof src === "string" ? resolveAssetUrl(projectName, src) : ""
 
