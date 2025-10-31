@@ -1,38 +1,18 @@
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { ArrowRight, Folder } from "lucide-react"
+import { getProjects as fetchProjects } from "@/lib/github"
 
 interface Project {
   name: string
   path: string
   type: string
-}
-
-async function getProjects(): Promise<Project[]> {
-  try {
-    const response = await fetch("https://api.github.com/repos/rileybarshak/projects/contents", {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-      },
-      next: { revalidate: 3600 }, // Revalidate every hour
-    })
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch projects")
-    }
-
-    const data = await response.json()
-
-    // Filter only directories
-    return data.filter((item: any) => item.type === "dir")
-  } catch (error) {
-    console.error("[v0] Error fetching projects:", error)
-    return []
-  }
+  tags: string[] // Assuming tags are added to the Project interface
 }
 
 export default async function Home() {
-  const projects = await getProjects()
+  const projects = await fetchProjects()
 
   return (
     <main className="min-h-screen bg-background">
@@ -67,7 +47,15 @@ export default async function Home() {
                     <CardDescription>View project documentation and resources</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-sm text-muted-foreground">Click to explore →</div>
+                    {project.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {project.tags.map((tag, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </Link>
