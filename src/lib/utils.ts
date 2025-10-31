@@ -2,5 +2,23 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+	return twMerge(clsx(inputs))
+}
+
+
+export function getBadgeColor(tag: string) {
+	const t = tag.toLowerCase()
+
+	if (["python", "typescript", "javascript", "java", "go"].includes(t)) //Languages
+		return "bg-green-200 text-green-700"
+	if (["react", "next.js", "tailwind css"].includes(t)) //Frameworks & Libraries
+		return "bg-blue-200 text-blue-700"
+	if (["docker", "git", "kubernetes"].includes(t)) //DevOps
+		return "bg-amber-200 text-amber-700"
+	if (["mongodb", "sql", "postgresql"].includes(t)) //Databases
+		return "bg-purple-200 text-purple-700"
+	if (["3d modeling", "3d printing", "cad", "arduino", "electrical systmes", "embedded systems"].includes(t)) //Hardware & Engineering 
+		return "bg-rose-200 text-rose-700"
+
+	return "text-xs"
 }

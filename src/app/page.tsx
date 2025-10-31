@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, Folder } from "lucide-react"
 import { getProjects, extractDescriptionFromProject } from "@/lib/github"
+import { getBadgeColor } from "@/lib/utils"
 
 interface Project {
 	name: string
@@ -50,7 +51,7 @@ export default async function Home() {
 										{project.tags.length > 0 && (
 											<div className="flex flex-wrap gap-2">
 												{project.tags.map((tag, index) => (
-													<Badge key={index} variant="secondary" className="text-xs">
+													<Badge key={index} variant="secondary" className={getBadgeColor(tag)}>
 														{tag}
 													</Badge>
 												))}
@@ -66,3 +67,5 @@ export default async function Home() {
 		</main>
 	)
 }
+
+

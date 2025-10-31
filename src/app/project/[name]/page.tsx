@@ -9,6 +9,7 @@ import ReactMarkdown from "react-markdown"
 import type { Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { getProjectFiles, getFileContent, extractTagsFromProject } from "@/lib/github"
+import { getBadgeColor } from "@/lib/utils"
 
 function resolveAssetUrl(projectName: string, url?: string) {
 	if (!url) return ""
@@ -68,7 +69,7 @@ export default async function ProjectPage({
 					{tags.length > 0 && (
 						<div className="flex flex-wrap gap-2 mb-4">
 							{tags.map((tag, i) => (
-								<Badge key={i} variant="secondary">
+								<Badge key={i} variant="secondary" className={getBadgeColor(tag)}>
 									{tag}
 								</Badge>
 							))}
