@@ -17,7 +17,7 @@ export function getBadgeColor(tag: string) {
 		return "bg-amber-200 text-amber-700"
 	if (["mongodb", "sql", "postgresql"].includes(t)) //Databases
 		return "bg-purple-200 text-purple-700"
-	if (["3d modeling", "3d printing", "cad", "arduino", "electrical systmes", "embedded systems"].includes(t)) //Hardware & Engineering 
+	if (["3d modeling", "3d printing", "cad", "arduino", "electrical systems", "embedded systems"].includes(t)) //Hardware & Engineering 
 		return "bg-rose-200 text-rose-700"
 
 	return "text-xs"

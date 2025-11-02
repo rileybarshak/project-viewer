@@ -84,8 +84,8 @@ export async function extractDescriptionFromProject(projectName: string): Promis
 		//check line 3 (index 2) for description
 		if (lines.length >= 3) {
 			const line3 = lines[2]
-			//Match pattern: **Project Goal:** Description
-			const match = line3.match(/\*\*Project?\s*Goal?:\*\*\s*(.+)/i)
+			//Match pattern: **Project Description:** Description
+			const match = line3.match(/\*\*Project?\s*Description?:\*\*\s*(.+)/i)
 			if (match) {
 				const desc = match[1]
 				return desc
@@ -134,9 +134,9 @@ export async function extractTagsFromProject(projectName: string): Promise<strin
 		const content = await contentResponse.text()
 		const lines = content.split("\n")
 
-		//Check line 4 (index 3) for tags
-		if (lines.length >= 4) {
-			const line4 = lines[3]
+		//Check line 5 (index 4) for tags
+		if (lines.length >= 5) {
+			const line4 = lines[4]
 			//Match pattern: **Languages & Technologies:** Next.js, React, TypeScript, Tailwind CSS
 			const match = line4.match(/\*\*Languages?\s*&\s*Technologies?:\*\*\s*(.+)/i)
 			if (match) {
