@@ -122,7 +122,7 @@ export default async function ProjectPage({
 												const resolvedSrc = typeof src === "string" ? resolveAssetUrl(projectPath, src) : ""
 
 												return (
-													// eslint-disable-next-line @next/next/no-img-element
+													//eslint-disable-next-line @next/next/no-img-element
 													<img
 														src={resolvedSrc}
 														alt={typeof alt === "string" ? alt : ""}

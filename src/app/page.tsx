@@ -9,7 +9,7 @@ interface Project {
 	name: string
 	path: string
 	type: string
-	tags: string[] // Assuming tags are added to the Project interface
+	tags: string[] //Assuming tags are added to the Project interface
 	status: string
 }
 
@@ -36,7 +36,7 @@ export default async function Home() {
 				<div className="mb-12 sm:mb-16">
 					<h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 text-balance">Projects</h1>
 					<p className="text-lg sm:text-xl text-muted-foreground max-w-2xl text-pretty">
-						A collection of projects from my GitHub repository. Click on any project to explore its documentation and
+						A collection of my projects in various stages of completion. Click on any project to explore its documentation and
 						resources.
 					</p>
 				</div>
