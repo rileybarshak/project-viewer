@@ -35,7 +35,7 @@ function resolveAssetUrl(projectPath: string, url?: string) {
 	if (/^(?:https?:|data:)/i.test(url)) return url
 	try {
 		return new URL(url, buildRawBaseUrl(projectPath)).toString()
-	} catch (_error) {
+	} catch {
 		return ""
 	}
 }
@@ -45,7 +45,7 @@ function resolvePageUrl(projectPath: string, href?: string) {
 	if (/^(?:https?:|mailto:|tel:)/i.test(href) || href.startsWith("#")) return href
 	try {
 		return new URL(href, buildRepoBaseUrl(projectPath)).toString()
-	} catch (_error) {
+	} catch {
 		return href
 	}
 }
@@ -118,13 +118,14 @@ export default async function ProjectPage({
 										<ReactMarkdown
 											remarkPlugins={[remarkGfm, remarkBreaks]}
 											components={{
-												img({ src, alt, ...props }) {
-													const resolvedSrc = typeof src === "string" ? resolveAssetUrl(projectPath, src) : ""
+											img({ src, alt, ...props }) {
+												const resolvedSrc = typeof src === "string" ? resolveAssetUrl(projectPath, src) : ""
 
-													return (
-														<img
-															src={resolvedSrc}
-															alt={typeof alt === "string" ? alt : ""}
+												return (
+													// eslint-disable-next-line @next/next/no-img-element
+													<img
+														src={resolvedSrc}
+														alt={typeof alt === "string" ? alt : ""}
 															loading="lazy"
 															className="rounded-lg max-w-full h-auto"
 															{...props}

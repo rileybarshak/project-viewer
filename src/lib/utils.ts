@@ -19,7 +19,6 @@ export function getBadgeColor(tag: string) {
 		return "bg-purple-200 text-purple-700"
 	if (["3d modeling", "3d printing", "cad", "arduino", "electrical systems", "embedded systems"].includes(t)) //Hardware & Engineering 
 		return "bg-rose-200 text-rose-700"
-
 	return "text-xs"
 }
 

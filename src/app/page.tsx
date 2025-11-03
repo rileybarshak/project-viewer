@@ -13,8 +13,21 @@ interface Project {
 	status: string
 }
 
+interface ProjectWithMeta extends Project {
+	description: string
+	redirectUrl: string | null
+}
+
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
-	const projects = await getProjects()
+	const baseProjects = await getProjects()
+	const projectsWithMeta: ProjectWithMeta[] = await Promise.all(
+		baseProjects.map(async (project) => {
+			const { description, redirectUrl } = await extractDescriptionFromProject(project.path)
+			return { ...project, description, redirectUrl }
+		}),
+	)
 
 	return (
 		<main className="min-h-screen bg-background">
@@ -29,14 +42,14 @@ export default async function Home() {
 				</div>
 
 				{/* Projects Grid */}
-				{projects.length === 0 ? (
+				{projectsWithMeta.length === 0 ? (
 					<div className="text-center py-12">
 						<p className="text-muted-foreground">No projects found.</p>
 					</div>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{projects.map((project) => (
-							<Link key={project.path} href={`/project/${encodeURIComponent(project.path)}`} className="group">
+						{projectsWithMeta.map((project) => {
+							const card = (
 								<Card className="h-full transition-all duration-200 hover:border-primary/50 hover:shadow-lg">
 									<CardHeader>
 										<div className="flex items-start justify-between mb-2">
@@ -46,7 +59,7 @@ export default async function Home() {
 											<ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
 										</div>
 										<CardTitle className="text-xl">{project.name}</CardTitle>
-										<CardDescription>{extractDescriptionFromProject(project.path)}</CardDescription>
+										{project.description && <CardDescription>{project.description}</CardDescription>}
 									</CardHeader>
 									<CardContent>
 										{project.tags.length > 0 && (
@@ -60,8 +73,24 @@ export default async function Home() {
 										)}
 									</CardContent>
 								</Card>
-							</Link>
-						))}
+							)
+
+							return project.redirectUrl ? (
+								<a
+									key={project.path}
+									href={project.redirectUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="group block"
+								>
+									{card}
+								</a>
+							) : (
+								<Link key={project.path} href={`/project/${encodeURIComponent(project.path)}`} className="group block">
+									{card}
+								</Link>
+							)
+						})}
 					</div>
 				)}
 			</div>

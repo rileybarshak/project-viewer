@@ -1,19 +1,54 @@
+type GitHubContentType = "file" | "dir"
+
 interface ProjectFile {
 	name: string
 	path: string
-	type: string
+	type: GitHubContentType
 	download_url: string | null
 }
 
 interface ProjectWithTags {
 	name: string
 	path: string
-	type: string
+	type: GitHubContentType
 	tags: string[]
-	status: string
+	status: StatusFolder | "Uncategorized"
 }
 
-const STATUS_DIRS = ["Completed", "In Progress", "Incomplete"]
+interface ProjectDescription {
+	description: string
+	redirectUrl: string | null
+}
+
+const STATUS_DIRS = ["Completed", "In Progress", "Incomplete"] as const
+const STATUS_LOOKUP = new Map(STATUS_DIRS.map((status) => [status.toLowerCase(), status] as const))
+
+type StatusFolder = typeof STATUS_DIRS[number]
+type DirectoryEntry = ProjectFile & { type: "dir" }
+
+function isDirectory(item: ProjectFile): item is DirectoryEntry {
+	return item.type === "dir"
+}
+
+function getCanonicalStatus(name: string): StatusFolder | undefined {
+	return STATUS_LOOKUP.get(name.toLowerCase())
+}
+
+function partitionStatusDirectories(directories: DirectoryEntry[]) {
+	const statusDirs: Array<{ entry: DirectoryEntry; status: StatusFolder }> = []
+	const otherDirs: DirectoryEntry[] = []
+
+	for (const dir of directories) {
+		const status = getCanonicalStatus(dir.name)
+		if (status) {
+			statusDirs.push({ entry: dir, status })
+		} else {
+			otherDirs.push(dir)
+		}
+	}
+
+	return { statusDirs, otherDirs }
+}
 
 export async function getProjects(): Promise<ProjectWithTags[]> {
 	try {
@@ -28,14 +63,14 @@ export async function getProjects(): Promise<ProjectWithTags[]> {
 			throw new Error("Failed to fetch projects")
 		}
 
-		const data = await response.json()
-		const directories = data.filter((item: any) => item.type === "dir")
-		const statusRoots = directories.filter((dir: any) => STATUS_DIRS.includes(dir.name))
+		const data: ProjectFile[] = await response.json()
+		const directories = data.filter(isDirectory)
+		const { statusDirs, otherDirs } = partitionStatusDirectories(directories)
 
-		if (statusRoots.length === 0) {
-			// Fallback for legacy structure where projects live at repo root
+		if (statusDirs.length === 0) {
+			//Fallback for legacy structure where projects live at repo root
 			return Promise.all(
-				directories.map(async (dir: any) => {
+				directories.map(async (dir) => {
 					const tags = await extractTagsFromProject(dir.name)
 					return {
 						name: dir.name,
@@ -50,9 +85,8 @@ export async function getProjects(): Promise<ProjectWithTags[]> {
 
 		const projectsWithTags: ProjectWithTags[] = []
 
-		for (const statusDir of statusRoots) {
-			const statusName: string = statusDir.name
-			const statusPath = encodeURIComponent(statusName)
+		for (const { entry: statusDir, status: statusName } of statusDirs) {
+			const statusPath = encodePath(statusDir.path)
 			const subResp = await fetch(
 				`https://api.github.com/repos/rileybarshak/projects/contents/${statusPath}`,
 				{
@@ -61,7 +95,8 @@ export async function getProjects(): Promise<ProjectWithTags[]> {
 				},
 			)
 			if (!subResp.ok) continue
-			const subDirs = (await subResp.json()).filter((item: any) => item.type === "dir")
+			const subData: ProjectFile[] = await subResp.json()
+			const subDirs = subData.filter(isDirectory)
 			for (const sub of subDirs) {
 				const name: string = sub.name
 				const path: string = `${statusName}/${name}`
@@ -78,10 +113,9 @@ export async function getProjects(): Promise<ProjectWithTags[]> {
 
 
 		if (projectsWithTags.length === 0) {
-			const nonStatusDirs = directories.filter((dir: any) => !STATUS_DIRS.includes(dir.name))
-			if (nonStatusDirs.length > 0) {
+			if (otherDirs.length > 0) {
 				return Promise.all(
-					nonStatusDirs.map(async (dir: any) => {
+					otherDirs.map(async (dir) => {
 						const tags = await extractTagsFromProject(dir.name)
 						return {
 							name: dir.name,
@@ -133,10 +167,10 @@ export async function resolveProjectPath(nameOrPath: string): Promise<string | n
 	return null
 }
 
-export async function extractDescriptionFromProject(projectName: string): Promise<string> {
+export async function extractDescriptionFromProject(projectName: string): Promise<ProjectDescription> {
 	try {
 		const projectPath = await resolveProjectPath(projectName)
-		if (!projectPath) return ""
+		if (!projectPath) return { description: "", redirectUrl: null }
 		//Fetch project files
 		const response = await fetch(
 			`https://api.github.com/repos/rileybarshak/projects/contents/${encodePath(projectPath)}`,
@@ -149,14 +183,14 @@ export async function extractDescriptionFromProject(projectName: string): Promis
 		)
 
 		if (!response.ok) {
-			return ""
+			return { description: "", redirectUrl: null }
 		}
 
 		const files: ProjectFile[] = await response.json()
 		const markdownFile = files.find((file) => file.name.toLowerCase().endsWith(".md") && file.download_url)
 
 		if (!markdownFile || !markdownFile.download_url) {
-			return ""
+			return { description: "", redirectUrl: null }
 		}
 
 		//Fetch markdown content
@@ -165,28 +199,34 @@ export async function extractDescriptionFromProject(projectName: string): Promis
 		})
 
 		if (!contentResponse.ok) {
-			return ""
+			return { description: "", redirectUrl: null }
 		}
 
 		const content = await contentResponse.text()
 		const lines = content.split("\n")
+		const firstNonEmptyLine = lines.find((line) => line.trim().length > 0) ?? ""
+		let redirectUrl: string | null = null
+		const linkMatch = firstNonEmptyLine.match(/^\s*#\s*\[[^\]]+\]\((https?:\/\/[^\s)]+)\)/i)
+		if (linkMatch) {
+			redirectUrl = linkMatch[1]
+		}
 
 		//check line 3 (index 2) for description
+		let desc = ""
 		if (lines.length >= 3) {
 			const line3 = lines[2]
 			//Match pattern: **Project Description:** Description
 			const match = line3.match(/\*\*Project?\s*Description?:\*\*\s*(.+)/i)
 			if (match) {
-				const desc = match[1]
-				return desc
+				desc = match[1].trim()
 			}
 
 		}
 
-		return ""
+		return { description: desc, redirectUrl }
 	} catch (error) {
-		console.error(`Error extracting tags for ${projectName}:`, error)
-		return ""
+		console.error(`Error extracting project description for ${projectName}:`, error)
+		return { description: "", redirectUrl: null }
 	}
 }
 
@@ -269,7 +309,8 @@ export async function getProjectFiles(projectName: string): Promise<ProjectFile[
 			return []
 		}
 
-		return await response.json()
+		const files: ProjectFile[] = await response.json()
+		return files
 	} catch (error) {
 		console.error("Error fetching project files:", error)
 		return []
