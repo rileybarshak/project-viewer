@@ -7,7 +7,15 @@ import { Folder } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn, getBadgeColor, getFolderColor, getStatusBadgeColor } from "@/lib/utils"
+import { cn, getFolderColor, getStatusBadgeColor } from "@/lib/utils"
+import { tagCategories } from "@/lib/config"
+
+const tagColorByValue = Object.values(tagCategories).reduce<Record<string, string>>((acc, [classes, tags]) => {
+	tags.forEach((tag) => {
+		acc[tag.toLowerCase()] = classes
+	})
+	return acc
+}, {})
 
 type ProjectCard = {
 	name: string
@@ -173,7 +181,8 @@ export default function ProjectsGallery({ projects }: ProjectsGalleryProps) {
 												<Badge
 													key={`${project.path}-${tag}-${index}`}
 													variant="secondary"
-													className={getBadgeColor(tag)}
+													className={cn("text-xs", tagColorByValue[tag.toLowerCase()] ?? "")
+}
 												>
 													{tag}
 												</Badge>

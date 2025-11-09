@@ -9,7 +9,15 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import remarkBreaks from "remark-breaks";
 import { getProjectFiles, getFileContent, extractTagsFromProject, resolveProjectPath } from "@/lib/github"
-import { getBadgeColor } from "@/lib/utils"
+import { cn } from "@/lib/utils"
+import { tagCategories } from "@/lib/config"
+
+const tagColorByValue = Object.values(tagCategories).reduce<Record<string, string>>((acc, [classes, tags]) => {
+	tags.forEach((tag) => {
+		acc[tag.toLowerCase()] = classes
+	})
+	return acc
+}, {})
 
 function encodePath(path: string) {
 	return path
@@ -93,7 +101,7 @@ export default async function ProjectPage({
 					{tags.length > 0 && (
 						<div className="flex flex-wrap gap-2 mb-4">
 							{tags.map((tag, i) => (
-								<Badge key={i} variant="secondary" className={getBadgeColor(tag)}>
+								<Badge key={i} variant="secondary" className={cn("text-xs", tagColorByValue[tag.toLowerCase()] ?? "")}>
 									{tag}
 								</Badge>
 							))}
