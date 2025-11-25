@@ -57,24 +57,17 @@ A Next.js application that pulls live project documentation from your GitHub acc
 
 ## Local Development
 
-1. Clone your fork and enter the directory.
-2. Install dependencies (`npm install`, `pnpm install`, or `yarn install`).
-3. Ensure `config.yaml` has the correct `githubUser`
-4. Start the dev server:
+1. Install Node.js (with `npm`, `pnpm`, or `yarn`).
+2. Fork the repository, clone it to your machine, and enter the directory.
+3. Install dependencies (`npm install`, `pnpm install`, or `yarn install`).
+4. Ensure `config.yaml` has the correct `githubUser`
+5. Start the dev server:
 
    ```bash
    pnpm run dev
    ```
 
 5. Open `http://localhost:3000` to verify your project cards render correctly.
-
----
-
-## Deployment Checklist
-
-- **Environment variable**: set values in `config.yaml` 
-- **Cold starts / caching**: API responses are cached for 60 seconds; refresh after a minute if you just pushed new Markdown.
-- **CORS and tokens**: Public repos work anonymously. If you hit GitHub’s rate limit, add a server-side proxy or inject a token in `github.ts`.
 
 ---
 
@@ -94,6 +87,24 @@ A Next.js application that pulls live project documentation from your GitHub acc
 - **404 in project view**: Folder names must match exactly (including status subfolders); ensure at least one Markdown file exists.
 - **Images not loading**: Use relative paths in Markdown (`./img/screenshot.png`) so the viewer can resolve them against GitHub.
 
+---
+
+## Deployment Checklist
+
+- **Environment variable**: set values in `config.yaml` 
+- **Cold starts / caching**: API responses are cached for 60 seconds; refresh after a minute if you just pushed new Markdown.
+- **CORS and tokens**: Public repos work anonymously. If you hit GitHub’s rate limit, add a server-side proxy or inject a token in `github.ts`.
+
+---
+
+## Deploy with Vercel
+- **Why Vercel**: You can deploy however you like, but Vercel is the easiest free method.
+- Follow the steps above to get project-viewer running locally using your own Github repositories.
+- Visit [Vercel.com](https://vercel.com), log-in/sign-up, and connect your Github account.
+- Create a new project using your Github repository
+- Keep all settings the same and press `Deploy`
+- After some time your site will be deployed and will automatically redeploy with each push to master
+- Thats it! If you'd like, you can [add a domain.](https://vercel.com/docs/getting-started-with-vercel/domains)
 ---
 
 Need inspiration? Fork both repos, swap in your username, and you’ll have a personalized project hub in minutes. Happy showcasing!
