@@ -114,3 +114,7 @@ Need inspiration? Fork both repos, swap in your username, and you’ll have a pe
 ## License Notice
 
 This project is distributed under the license described in [`LICENSE`](./LICENSE). Derivative works must display the footer attribution required by [`NOTICE`](./NOTICE).
+
+---
+
+Found this project helpful? Drop a ⭐ on the repo!
